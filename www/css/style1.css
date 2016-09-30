@@ -1,0 +1,101 @@
+#interactiveChart1 {
+  height: 80vmin;
+ }
+ .nv-focus .nv-barsWrap, /* top chart volume bars */
+ .nv-focus .nv-y1 .tick text, /* top chart left y axis lines bars */
+ .nv-focus .nv-y1 .nv-axisMaxMin text, /* top chart left y axis max/min values */
+ .nv-focus .nv-y1 .domain, /* top chart left y axis bounding box */
+ .nv-context .nv-x .nv-axisMaxMin text, /* bottom chart */
+ .nv-context .nv-y2 .domain,
+ .nv-context .nv-y2 .nv-axisMaxMin text,
+ .nv-context .nv-y2 .tick text{
+   text-anchor:start !important;
+ }
+ .nv-focus .nv-y1 .nv-axisMaxMin text,
+ #interactiveChart1{
+   text-anchor: start !important;
+ }
+
+.nv-focus .nv-x .tick:first-of-type text,
+ #interactiveChart1 text.nv-axislabel {
+   text-anchor: start !important;
+ }
+
+ .nv-focus .nv-y2 .tick text,
+ .nv-focus .nv-y2 .nv-axisMaxMin text,
+ .nv-focus .nv-x .tick:last-of-type text,
+ .nv-context .nv-y1 .tick text,
+ .nv-context .nv-y1 .nv-axisMaxMin text {
+   text-anchor: end !important;
+ }
+
+ #interactiveChart1 svg text {
+   font-size: 3vmin !important;
+ }
+
+ #interactiveChart1 .nv-axis line /* interior grid */ {
+   stroke-dasharray: 3,3;
+   stroke: #ddd;
+ }
+
+ #interactiveChart1 .nv-axis path.domain /* both charts' bounding boxes */ {
+   stroke-dasharray: 4,4;
+   stroke-opacity: .5;
+   stroke-width: 1px;
+ }
+
+ #interactiveChart1 .nv-focus .domain /* top chart bounding box color */ {
+   stroke: #1e88e5;
+ }
+
+ #interactiveChart1 .nv-focus .nv-axislabel,
+ #interactiveChart1 .nv-focus .nv-axisMaxMin text /* top chart label and max/min values colors */ {
+   fill:#ff1a1a;
+ }
+
+ #interactiveChart1 .nv-context .domain /* bottom chart */ {
+   stroke: #ff9800;
+ }
+
+ #interactiveChart1 .nv-context .nv-axislabel,
+ #interactiveChart1 .nv-context .nv-axisMaxMin text {
+   fill:#ff1a1a;
+     text-anchor: start !important;
+ }
+
+ #interactiveChart1 .nv-focus .nv-y1 .tick text,
+ #interactiveChart1 .nv-focus .nv-y2 .tick text,
+ #interactiveChart1 .nv-context .nv-y1 .tick text /* both charts' y axis interior range values colors */ {
+   fill: #000000;
+ }
+
+ #interactiveChart1 .nv-focus .nv-line /* top chart price line */ {
+   stroke: #2196f3;
+   stroke-width: 2px;
+ }
+
+ #interactiveChart1 .nv-context .nv-line /* bottom chart price line */ {
+   stroke: #aaa;
+   stroke-opacity: .75;
+   stroke-width: 2px;
+ }
+
+ #interactiveChart1 .nv-line {
+   stroke-linecap: round;
+   stroke-linejoin: round;
+ }
+
+ #interactiveChart1 .nv-barsWrap rect /* bottom chart volume bars */ {
+   fill: #AEC7E8;
+   /*fill-opacity: 0;*/
+   shape-rendering: crispEdges;
+ }
+
+ #interactiveChart1 .nv-brushBackground rect /* context chart range scroller */ {
+   shape-rendering: crispEdges;
+   stroke-width: 1;
+   stroke: #ccc;
+ }
+/*#interactiveChart1 .nv-context .nv-axisMaxMin  text{
+  text-anchor: end ! important;
+}*/

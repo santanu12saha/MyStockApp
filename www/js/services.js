@@ -117,7 +117,7 @@ angular.module('MyStockApp.services', [])
            firebaseRef.database().ref().child('emails').push(user.email);
            firebaseUserRef.child(userData.uid).child('stocks').set(myStocksArrayService);
            console.log("Successfully created user account with uid:", userData.uid);
-           var stocksWithNotes = notesCacheService.key();
+           var stocksWithNotes = notesCacheService.keys();
            stocksWithNotes.forEach(function(stockWithNotes){
              var notes = notesCacheService.get(stockWithNotes);
              notes.forEach(function(note){
@@ -156,7 +156,7 @@ angular.module('MyStockApp.services', [])
       else
       {
 
-        alert("no user sign in");
+        console.log("no user sign in");
       }
     });
 
@@ -168,22 +168,9 @@ var updateNotes = function(ticker, notes){
   firebaseRef.auth().onAuthStateChanged(function(user) {
     if (user) {
       uid = user.uid;
-      var checkDuplicate = firebaseUserRef.child(uid).child('notes').child(ticker);
-          checkDuplicate.on('value', function(snapshot) {
-
-          angular.forEach(snapshot.val(),function(titlenote){
-              noteDb.push(titlenote);
-              console.log(noteDb);
-            });
-
-          });
-          if(noteDb.length > 0)
-          {
-            var childKey = firebaseUserRef.child(uid).child('notes').child(ticker);
+        var childKey = firebaseUserRef.child(uid).child('notes').child(ticker);
             childKey.remove();
-          }
-
-      notes.forEach(function(note){
+            notes.forEach(function(note){
 
         firebaseUserRef.child(uid).child('notes').child(note.ticker).push(note);
       });
@@ -379,6 +366,23 @@ var updateNotes1 = function(ticker, notes){
   return stockPriceCache;
 })
 
+.factory('stockDataCacheService1',function(CacheFactory){
+  var stockDataCache1;
+  if(!CacheFactory.get('stockDataCache1')) {
+    stockDataCache1 = CacheFactory('stockDataCache1', {
+       maxAge: 5 * 1000,
+       deleteOnExpire: 'aggressive',
+       storageMode: 'localStorage'
+     });
+   }
+   else
+   {
+     stockDataCache1 = CacheFactory.get('stockDataCache1');
+   }
+
+  return stockDataCache1;
+})
+
 .factory('notesCacheService',function(CacheFactory){
 
   var notesCache;
@@ -413,7 +417,7 @@ var updateNotes1 = function(ticker, notes){
         {ticker:"FB"},
         {ticker:"NFLX"},
         {ticker:"TSLA"},
-        {ticker:"BRK-A"},
+        {ticker:"BRK.A"},
         {ticker:"INTC"},
         {ticker:"MSFT"},
         {ticker:"GE"},
@@ -483,7 +487,7 @@ var updateNotes1 = function(ticker, notes){
         }
         else
         {
-            console.console.log("no user sign in");
+            console.log("no user sign in");
         }
       });
 
@@ -518,15 +522,14 @@ var updateNotes1 = function(ticker, notes){
   };
 })
 
-.factory('stockDataService',function($q, $http, encodeURIService,stockDetailsCacheService,stockPriceCacheService){
+.factory('stockDataService',function($q, $http, encodeURIService,stockDetailsCacheService,stockPriceCacheService,stockDataCacheService1){
 
   var getDetailsData = function(ticker)
   {
     var deffered = $q.defer(),
     cacheKey = ticker,
     stockDetailsCache = stockDetailsCacheService.get(cacheKey),
-    query = 'select * from yahoo.finance.quotes where symbol IN ("' + ticker + '")',
-    url = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIService.encode(query) + '&format=json&env=http://datatables.org/alltables.env';
+    url = 'https://api.iextrading.com/1.0/stock/'+ticker +'/quote';
     console.log(url);
     if(stockDetailsCache)
     {
@@ -536,7 +539,7 @@ var updateNotes1 = function(ticker, notes){
     {
       $http.get(url)
       .success(function(json){
-        var jsonData = json.query.results.quote;
+        var jsonData = json;
         deffered.resolve(jsonData);
         stockDetailsCacheService.put(cacheKey, jsonData);
       })
@@ -559,11 +562,11 @@ var updateNotes1 = function(ticker, notes){
       var deffered = $q.defer(),
       cacheKey = ticker,
       stockPriceCache =  stockPriceCacheService.get(cacheKey);
-      url="http://finance.yahoo.com/webservice/v1/symbols/" + ticker + "/quote?format=json&view=detail";
+      url = 'https://api.iextrading.com/1.0/stock/'+ticker +'/quote';
 
         $http.get(url)
         .success(function(json){
-          var jsonData = json.list.resources[0].resource.fields;
+          var jsonData = json;
           deffered.resolve(jsonData);
           stockPriceCacheService.put(cacheKey, jsonData);
 
@@ -578,46 +581,102 @@ var updateNotes1 = function(ticker, notes){
     return deffered.promise;
   };
 
+  var getDetailsData1 = function(ticker){
+
+    var deffered = $q.defer(),
+    cacheKey = ticker,
+    stockDataCache =  stockDataCacheService1.get(cacheKey);
+    url = 'https://api.iextrading.com/1.0/stock/'+ ticker +'/stats';
+
+      $http.get(url)
+      .success(function(json){
+        var jsonData = json;
+        deffered.resolve(jsonData);
+        stockDataCacheService1.put(cacheKey, jsonData);
+
+      })
+      .error(function(error){
+          console.log("Price Data error : "+error);
+          deffered.reject();
+      });
+
+
+
+  return deffered.promise;
+
+  };
+
+
   return {
       getPriceData: getPriceData,
-      getDetailsData: getDetailsData
+      getDetailsData: getDetailsData,
+      getDetailsData1: getDetailsData1
+
   };
+
+
 
 })
 
+
+
+
 .factory('chartDataService',function($q, $http, encodeURIService,chartDataCacheService){
 
-  var getHistoricalData = function(ticker,fromDate,todayDate){
+  var getHistoricalData = function(ticker,fromDate,todayDate,n){
 
     var deferred = $q.defer(),
     cacheKey = ticker+" fromdate: "+fromDate+" todaydate: "+todayDate,
-    chartDataCache = chartDataCacheService.get(cacheKey),
-    query = 'select * from yahoo.finance.historicaldata where symbol = "' + ticker + '" and startDate = "' + fromDate + '" and endDate = "' + todayDate + '"';
-    url = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIService.encode(query) + '&format=json&env=http://datatables.org/alltables.env';
+    chartDataCache = chartDataCacheService.get(cacheKey);
+
+    console.log(n);
+    if(n==1)
+    {
+      url = 'https://api.iextrading.com/1.0/stock/'+ ticker +'/chart/1m';
+    }
+    else if(n==2){
+      url = 'https://api.iextrading.com/1.0/stock/'+ ticker +'/chart/3m';
+    }
+    else if(n==3){
+      url = 'https://api.iextrading.com/1.0/stock/'+ ticker +'/chart/6m';
+    }
+    else if(n == 4){
+      url = 'https://api.iextrading.com/1.0/stock/'+ ticker +'/chart/1y';
+    }
+    else if(n == 5)
+    {
+      url = 'https://api.iextrading.com/1.0/stock/'+ ticker + '/chart/5y';
+    }
+
     if(chartDataCache) {
        deferred.resolve(chartDataCache);
      }
      else {
 
+
+
+
            $http.get(url)
              .success(function(json) {
-               var jsonData = json.query.results.quote;
+               var jsonData = json;
+               console.log(json);
 
                var priceData = [],
                volumeData = [];
 
                angular.forEach(jsonData,function(dayDataObject) {
+                 console.log(dayDataObject);
 
-                 var dateToMillis = dayDataObject.Date,
-                 date = Date.parse(dateToMillis),
-                 price = parseFloat(Math.round(dayDataObject.Close * 100) / 100).toFixed(3),
-                 volume = dayDataObject.Volume,
+                 date = Date.parse(dayDataObject.date),
+
+                 price = parseFloat(Math.round(dayDataObject.close * 100) / 100).toFixed(3),
+                 volume = dayDataObject.volume,
 
                  volumeDatum = '[' + date + ',' + volume + ']',
                  priceDatum = '[' + date + ',' + price + ']';
-
                  volumeData.unshift(volumeDatum);
                  priceData.unshift(priceDatum);
+
 
                });
 

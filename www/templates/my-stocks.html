@@ -12,18 +12,18 @@
 
     ></ion-refresher>
     <ion-list>
-      <ion-item ng-repeat="stock in myStocksData | orderBy: '-chg_percent' track by stock.symbol" ng-href="#/app/{{stock.symbol}}">
+      <ion-item ng-repeat="stock in myStocksData | orderBy: '-changePercent' track by stock.symbol" ng-href="#/app/{{stock.symbol}}">
         <div class="row row-center">
           <div class="col stock-ticker-name">
             <h3>{{stock.symbol}}</h3>
-            <h6 ng-bind-html="::stock.name | characters:17:false:true"></h6>
+            <h6 ng-bind-html="::stock.companyName | characters:17:false:true"></h6>
           </div>
           <div class="col col-25 stock-price-time">
-            <h3>{{stock.price | shrinkNumber:2}}</h3>
-            <h6>{{stock.utctime | date:'h:mm a'}}</h6>
+            <h3>{{stock.latestPrice | shrinkNumber:2}}</h3>
+            <h6>{{stock.latestUpdate | date:'h:mm a'}}</h6>
           </div>
           <div class="col col-33 stock-change" ng-class="stock.change >= 0 ? 'background-green' : 'background-red'">
-            <h3><span ng-if="stock.change >= 0">+</span>{{stock.chg_percent | number:3}}%</h3>
+            <h3><span ng-if="stock.change >= 0">+</span>{{stock.changePercent | number:3}}%</h3>
             <h6><span ng-if="stock.change >= 0">+</span>{{stock.change | shrinkNumber:2}}</h6>
           </div>
         </div>

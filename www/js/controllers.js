@@ -53,7 +53,7 @@ function($scope, $stateParams,stockDataService,$window,$ionicPopup,$cordovaInApp
 
   $scope.ticker = $stateParams.stockTicker;
 
-  $scope.chartView = 4;
+  $scope.chartView = 1;
   $scope.oneYearAgoDate = dateService.oneYearAgoDate();
   $scope.todayDate = dateService.currentDate();
   $scope.following = followStockService.checkFollowing($scope.ticker);
@@ -67,6 +67,7 @@ function($scope, $stateParams,stockDataService,$window,$ionicPopup,$cordovaInApp
     getPriceData();
     getDetailsData();
     getChartData();
+    getDetailsData1();
     getNews();
     $scope.stockNotes = notesService.getNotes($scope.ticker);
   });
@@ -97,13 +98,11 @@ function($scope, $stateParams,stockDataService,$window,$ionicPopup,$cordovaInApp
     $scope.chartView = n;
     if($scope.chartView == 1)
     {
-      $scope.todayDate = "";
-      $scope.oneYearAgoDate ="";
-      $scope.todayDate = dateService.currentDate();
 
+      $scope.todayDate = dateService.currentDate();
       $scope.oneYearAgoDate = dateService.oneDayAgo();
 
-      getChartData();
+      getChartData(n);
     }
     if($scope.chartView == 2)
     {
@@ -211,10 +210,10 @@ function getNews(){
     promise.then(function(data){
       console.log(data);
       $scope.stockPriceData = data;
-      if(data.chg_percent >= 0 && data !== null) {
+      if(data.changePercent >= 0 && data !== null) {
        $scope.reactiveColor = {'background-color': '#33cd5f','border-color': 'rbga(255,255,255,.3)'};
          }
-         else if(data.chg_percent < 0 && data !== null)
+         else if(data.changePercent < 0 && data !== null)
          {
            $scope.reactiveColor = {'background-color' : '#ef473a','border-color': 'rbga(0,0,0,.2)'};
          }
@@ -227,9 +226,16 @@ function getNews(){
       $scope.stockDetailsData = data;
     });
   }
+  function getDetailsData1(){
+    var promise = stockDataService.getDetailsData1($scope.ticker);
+    promise.then(function(data){
+      console.log(data);
+          $scope.stockDetailsData1 = data;
+    });
+  }
 
   function getChartData(){
-    var promise= chartDataService.getHistoricalData($scope.ticker, $scope.oneYearAgoDate, $scope.todayDate);
+    var promise= chartDataService.getHistoricalData($scope.ticker, $scope.oneYearAgoDate, $scope.todayDate,$scope.chartView);
 
     promise.then(function(data){
         console.log(data);
